@@ -18,7 +18,7 @@
             <!-- .end row -->
             <div class="row">
                 <div class="col-12">
-                    <form id="contact-form" action="mail.php" method="post">
+                    <form id="contact-form" action="" method="post">
                         <!-- Message Input Area Start -->
                         <div class="contact_input_area">
                             <div id="success_fail_info"></div>
@@ -166,12 +166,15 @@
             if(error <= 0) {
                 $.ajax({
                     type: 'POST',
-                    url: "<?=base_url('frontend/contactMailSend')?>",
+                    url: "<?=base_url('frontend/send_mail')?>",
                     data: {'name' : name, 'email' : email, 'phone' : phone, 'subject' : subject, 'message' : message},
                     dataType: "html",
                     success: function(data) {
                         if(data = 'success') {
-                            location.reload();
+                            console.log(data)
+                            // location.reload();
+                        }else{
+                            console.log(data)
                         }
                     }
                 });

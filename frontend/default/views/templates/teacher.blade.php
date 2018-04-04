@@ -39,11 +39,10 @@
 
             axios.post('<?php echo base_url(); ?>Frontend/teacher_search', params)
                 .then(function (data) {
-                    console.log(data);
                     $('#search_results').html(data.data);
                 })
                 .catch(function (error) {
-                    console.log(error);
+                    $('#search_results').html(error);
                 });
 
         }

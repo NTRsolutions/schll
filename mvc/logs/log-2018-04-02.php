@@ -61,3 +61,4 @@ AND `c`.`start` = 1
 AND `b`.`draft` =0
 GROUP BY `b`.`id`
 ORDER BY `b`.`id` DESC
+ERROR - 2018-04-02 23:36:28 --> Severity: Warning --> mail(): Failed to connect to mailserver at &quot;localhost&quot; port 25, verify your &quot;SMTP&quot; and &quot;smtp_port&quot; setting in php.ini or use ini_set() D:\wamp64\www\school\main\libraries\Email.php 1896

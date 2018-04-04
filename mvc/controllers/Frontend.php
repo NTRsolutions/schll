@@ -28,6 +28,8 @@ class Frontend extends Frontend_Controller {
         $this->load->model('user_m');
         $this->load->model('book_m');
         $this->load->model('teacher_m');
+        $this->load->library('session');
+        $this->load->helper('form');
 
     }
 
@@ -366,5 +368,369 @@ class Frontend extends Frontend_Controller {
             }
         }
     }
+
+    // Contact
+    protected function rules() {
+        $rules = array(
+            array(
+                'field' => 'userGroup',
+                'label' => $this->lang->line("select_group"),
+                'rules' => 'trim|required|xss_clean|max_length[128]|callback_unique_userGroup'
+            ),
+            array(
+                'field' => 'message',
+                'label' => $this->lang->line("message"),
+                'rules' => 'trim|required|xss_clean'
+            ),
+            array(
+                'field' => 'subject',
+                'label' => $this->lang->line("subject"),
+                'rules' => 'trim|required|xss_clean'
+            ),
+            array(
+                'field' => 'attachment',
+                'label' => $this->lang->line("attachment"),
+                'rules' => 'trim|xss_clean'
+            )
+        );
+        return $rules;
+    }
+
+    public function ontactMailSend() {
+        if($_POST) {
+            $rules = $this->rules();
+            $this->form_validation->set_rules($rules);
+            if ($this->form_validation->run() == FALSE) {
+                $this->data['form_validation'] = validation_errors();
+                $this->data['GroupID'] = $this->input->post('userGroup');
+                $this->data["subview"] = "conversation/add_group";
+                $this->load->view('_layout_main', $this->data);
+            } else {
+                $conversation_user = array();
+                $conversations = array(
+                    "create_date" => date("Y-m-d h:i:s"),
+                    "modify_date" => date("Y-m-d h:i:s"),
+                    "draft"       => 0
+                );
+
+                $conversation_msg = array(
+                    "user_id" => $userID,
+                    "usertypeID" => $usertypeID,
+                    "subject" => $this->input->post('subject'),
+                    "msg" => $this->input->post('message'),
+                    "create_date" => date("Y-m-d h:i:s"),
+                    "modify_date" => date("Y-m-d h:i:s"),
+                    "start" => 1
+                );
+
+
+                if ($this->input->post('userGroup')) {
+                    $convID = '';
+                    $convID = $this->conversation_m->insert_conversation($conversations);
+                    $conversation_user = array(
+                        "conversation_id" => $convID,
+                        "user_id" => $userID,
+                        "usertypeID" => $usertypeID,
+                        "is_sender" => 1,
+                    );
+                    $this->conversation_m->insert_conversation_user($conversation_user);
+
+                    if ($this->input->post('userGroup')== 3) {
+                        if (!$this->input->post('classID')) {
+                            $students = $this->conversation_m->get_all_student();
+                            if ($students) {
+                                foreach ($students as $student) {
+                                    $conversation_user = array(
+                                        "conversation_id" => $convID,
+                                        "user_id" => $student->studentID,
+                                        "usertypeID" => $student->usertypeID
+                                    );
+                                    $userAdd = $this->conversation_m->insert_conversation_user($conversation_user);
+                                }
+                                $conversation_msg['conversation_id'] = $convID;
+                                $msgAdd = $this->conversation_m->insert_conversation_msg($conversation_msg);
+                                if ($msgAdd==true) {
+                                    $this->session->set_flashdata('success', $this->lang->line("success_msg"));
+                                    redirect(base_url('conversation/index'));
+                                } else {
+                                    $this->session->set_flashdata('error', $this->lang->line("error_msg"));
+                                    redirect(base_url('conversation/create'));
+                                }
+                            } else {
+                                $this->session->set_flashdata('error', $this->lang->line("error_msg_not_found"));
+                                redirect(base_url('conversation/create'));
+                            }
+                        } else {
+                            $classID = $this->input->post('classID');
+                            $studentID = $this->input->post('studentID');
+                            $students = array();
+                            if ($studentID) {
+                                $students = $this->conversation_m->get_student_by_class($studentID);
+                            } else {
+                                $students = $this->conversation_m->get_order_by_student_class($classID);
+                            }
+                            if ($students) {
+                                foreach ($students as $student) {
+                                    $conversation_user = array(
+                                        "conversation_id" => $convID,
+                                        "user_id" => $student->studentID,
+                                        "usertypeID" => $student->usertypeID
+                                    );
+                                    $userAdd = $this->conversation_m->insert_conversation_user($conversation_user);
+                                }
+                                $conversation_msg['conversation_id'] = $convID;
+                                $msgAdd = $this->conversation_m->insert_conversation_msg($conversation_msg);
+                                if ($msgAdd==true) {
+                                    $this->session->set_flashdata('success', $this->lang->line("success_msg"));
+                                    redirect(base_url('conversation/index'));
+                                } else {
+                                    $this->session->set_flashdata('error', $this->lang->line("error_msg"));
+                                    redirect(base_url('conversation/create'));
+                                }
+                            } else {
+                                $this->session->set_flashdata('error', $this->lang->line("error_msg_not_found"));
+                                redirect(base_url('conversation/create'));
+                            }
+                        }
+                    } elseif($this->input->post('userGroup') == 1) {
+                        if (!$this->input->post('systemadminID')) {
+                            $systemadmins = $this->systemadmin_m->get_systemadmin();
+                            if ($systemadmins) {
+                                foreach ($systemadmins as $systemadmin) {
+                                    $conversation_user = array(
+                                        "conversation_id" => $convID,
+                                        "user_id" => $systemadmin->systemadminID,
+                                        "usertypeID" => $systemadmin->usertypeID
+                                    );
+                                    $userAdd = $this->conversation_m->insert_conversation_user($conversation_user);
+                                }
+                                $conversation_msg['conversation_id'] = $convID;
+                                $msgAdd = $this->conversation_m->insert_conversation_msg($conversation_msg);
+                                if ($msgAdd==true) {
+                                    $this->session->set_flashdata('success', $this->lang->line("success_msg"));
+                                    redirect(base_url('conversation/index'));
+                                } else {
+                                    $this->session->set_flashdata('error', $this->lang->line("error_msg"));
+                                    redirect(base_url('conversation/create'));
+                                }
+                            } else {
+                                $this->session->set_flashdata('error', $this->lang->line("error_msg_not_found"));
+                                redirect(base_url('conversation/create'));
+                            }
+
+                        } else {
+                            $systemadminID = $this->input->post('systemadminID');
+                            $systemadmin = $this->systemadmin_m->get_systemadmin($systemadminID);
+                            if (count($systemadmin)) {
+                                $conversation_user = array(
+                                    "conversation_id" => $convID,
+                                    "user_id" => $systemadmin->systemadminID,
+                                    "usertypeID" => $systemadmin->usertypeID
+                                );
+                                $userAdd = $this->conversation_m->insert_conversation_user($conversation_user);
+
+                                $conversation_msg['conversation_id'] = $convID;
+                                $msgAdd = $this->conversation_m->insert_conversation_msg($conversation_msg);
+                                if ($msgAdd==true) {
+                                    $this->session->set_flashdata('success', $this->lang->line("success_msg"));
+                                    redirect(base_url('conversation/index'));
+                                } else {
+                                    $this->session->set_flashdata('error', $this->lang->line("error_msg"));
+                                    redirect(base_url('conversation/create'));
+                                }
+                            } else {
+                                $this->session->set_flashdata('error', $this->lang->line("error_msg_not_found"));
+                                redirect(base_url('conversation/create'));
+                            }
+                        }
+                    } elseif ($this->input->post('userGroup') == 2) {
+                        if (!$this->input->post('teacherID')) {
+                            $teachers = $this->teacher_m->get_teacher();
+                            if ($teachers) {
+                                foreach ($teachers as $teacher) {
+                                    $conversation_user = array(
+                                        "conversation_id" => $convID,
+                                        "user_id" => $teacher->teacherID,
+                                        "usertypeID" => $teacher->usertypeID
+                                    );
+                                    $userAdd = $this->conversation_m->insert_conversation_user($conversation_user);
+                                }
+                                $conversation_msg['conversation_id'] = $convID;
+                                $msgAdd = $this->conversation_m->insert_conversation_msg($conversation_msg);
+                                if ($msgAdd==true) {
+                                    $this->session->set_flashdata('success', $this->lang->line("success_msg"));
+                                    redirect(base_url('conversation/index'));
+                                } else {
+                                    $this->session->set_flashdata('error', $this->lang->line("error_msg"));
+                                    redirect(base_url('conversation/create'));
+                                }
+                            } else {
+                                $this->session->set_flashdata('error', $this->lang->line("error_msg_not_found"));
+                                redirect(base_url('conversation/create'));
+                            }
+
+                        } else {
+                            $teacherID = $this->input->post('teacherID');
+                            $teacher = $this->teacher_m->get_teacher($teacherID);
+                            if (count($teacher)) {
+                                $conversation_user = array(
+                                    "conversation_id" => $convID,
+                                    "user_id" => $teacher->teacherID,
+                                    "usertypeID" => $teacher->usertypeID
+                                );
+                                $userAdd = $this->conversation_m->insert_conversation_user($conversation_user);
+
+                                $conversation_msg['conversation_id'] = $convID;
+                                $msgAdd = $this->conversation_m->insert_conversation_msg($conversation_msg);
+                                if ($msgAdd==true) {
+                                    $this->session->set_flashdata('success', $this->lang->line("success_msg"));
+                                    redirect(base_url('conversation/index'));
+                                } else {
+                                    $this->session->set_flashdata('error', $this->lang->line("error_msg"));
+                                    redirect(base_url('conversation/create'));
+                                }
+                            } else {
+                                $this->session->set_flashdata('error', $this->lang->line("error_msg_not_found"));
+                                redirect(base_url('conversation/create'));
+                            }
+                        }
+                    } else if($this->input->post('userGroup') == 4) {
+                        if (!$this->input->post('parentsID')) {
+                            $parents = $this->parents_m->get_parents();
+                            if ($parents) {
+                                foreach ($parents as $parent) {
+                                    $conversation_user = array(
+                                        "conversation_id" => $convID,
+                                        "user_id" => $parent->parentsID,
+                                        "usertypeID" => $parent->usertypeID
+                                    );
+                                    $userAdd = $this->conversation_m->insert_conversation_user($conversation_user);
+                                }
+                                $conversation_msg['conversation_id'] = $convID;
+                                $msgAdd = $this->conversation_m->insert_conversation_msg($conversation_msg);
+                                if ($msgAdd==true) {
+                                    $this->session->set_flashdata('success', $this->lang->line("success_msg"));
+                                    redirect(base_url('conversation/index'));
+                                } else {
+                                    $this->session->set_flashdata('error', $this->lang->line("error_msg"));
+                                    redirect(base_url('conversation/create'));
+                                }
+                            } else {
+                                $this->session->set_flashdata('error', $this->lang->line("error_msg_not_found"));
+                                redirect(base_url('conversation/create'));
+                            }
+
+                        } else {
+                            $parentsID = $this->input->post('parentsID');
+                            $parent = $this->parents_m->get_parents($parentsID);
+                            if (count($parent)) {
+                                $conversation_user = array(
+                                    "conversation_id" => $convID,
+                                    "user_id" => $parent->parentsID,
+                                    "usertypeID" => $parent->usertypeID
+                                );
+                                $userAdd = $this->conversation_m->insert_conversation_user($conversation_user);
+
+                                $conversation_msg['conversation_id'] = $convID;
+                                $msgAdd = $this->conversation_m->insert_conversation_msg($conversation_msg);
+                                if ($msgAdd==true) {
+                                    $this->session->set_flashdata('success', $this->lang->line("success_msg"));
+                                    redirect(base_url('conversation/index'));
+                                } else {
+                                    $this->session->set_flashdata('error', $this->lang->line("error_msg"));
+                                    redirect(base_url('conversation/create'));
+                                }
+                            } else {
+                                $this->session->set_flashdata('error', $this->lang->line("error_msg_not_found"));
+                                redirect(base_url('conversation/create'));
+                            }
+                        }
+                    } else {
+                        if (!$this->input->post('userID')) {
+                            $users = $this->user_m->get_user();
+                            if ($users) {
+                                foreach ($users as $user) {
+                                    $conversation_user = array(
+                                        "conversation_id" => $convID,
+                                        "user_id" => $user->userID,
+                                        "usertypeID" => $user->usertypeID
+                                    );
+                                    $userAdd = $this->conversation_m->insert_conversation_user($conversation_user);
+                                }
+                                $conversation_msg['conversation_id'] = $convID;
+                                $msgAdd = $this->conversation_m->insert_conversation_msg($conversation_msg);
+                                if ($msgAdd==true) {
+                                    $this->session->set_flashdata('success', $this->lang->line("success_msg"));
+                                    redirect(base_url('conversation/index'));
+                                } else {
+                                    $this->session->set_flashdata('error', $this->lang->line("error_msg"));
+                                    redirect(base_url('conversation/create'));
+                                }
+                            } else {
+                                $this->session->set_flashdata('error', $this->lang->line("error_msg_not_found"));
+                                redirect(base_url('conversation/create'));
+                            }
+
+                        } else {
+
+                            $userID = $this->input->post('userID');
+                            $user = $this->user_m->get_user($userID);
+                            if (count($user)) {
+                                $conversation_user = array(
+                                    "conversation_id" => $convID,
+                                    "user_id" => $user->userID,
+                                    "usertypeID" => $user->usertypeID
+                                );
+                                $userAdd = $this->conversation_m->insert_conversation_user($conversation_user);
+
+                                $conversation_msg['conversation_id'] = $convID;
+                                $msgAdd = $this->conversation_m->insert_conversation_msg($conversation_msg);
+                                if ($msgAdd==true) {
+                                    $this->session->set_flashdata('success', $this->lang->line("success_msg"));
+                                    redirect(base_url('conversation/index'));
+                                } else {
+                                    $this->session->set_flashdata('error', $this->lang->line("error_msg"));
+                                    redirect(base_url('conversation/create'));
+                                }
+                            } else {
+                                $this->session->set_flashdata('error', $this->lang->line("error_msg_not_found"));
+                                redirect(base_url('conversation/create'));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public function send_mail() {
+        $this->load->library('email');
+
+        $config = array();
+        $config['protocol'] = 'smtp';
+        $config['smtp_host'] = 'smtp.gmail.com';
+        $config['smtp_user'] = 'cinzadeh@gmail.com';
+        $config['smtp_pass'] = 'ZdH-6547896321';
+        $config['smtp_port'] = 456;
+        $this->email->initialize($config);
+
+        $this->email->set_newline("\r\n");
+
+
+        $from_email = "cinzadeh@gmail.com";
+        $to_email = "cinzadeh@gmail.com";
+
+        $this->email->from($from_email, 'Identification');
+        $this->email->to($to_email);
+        $this->email->subject('Send Email Codeigniter');
+        $this->email->message('The email send using codeigniter library');
+        //Send mail
+        if($this->email->send())
+            $this->session->set_flashdata("email_sent","Congragulation Email Send Successfully.");
+        else
+            $this->session->set_flashdata("email_sent","You have encountered an error");
+        $this->load->view('contact_email_form');
+    }
+
 
 }
