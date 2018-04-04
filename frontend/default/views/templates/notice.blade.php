@@ -9,7 +9,7 @@
             <div class="row">
                 <div class="col-12 pb-5">
                     <div class="form-group">
-                        <input class="form-control" name="search_data" id="search_data" type="text" placeholder="search" onkeyup="search_data()">
+                        <input class="form-control" name="search_data" id="search_data" type="text" placeholder="Axtarış" onkeyup="search_data()">
                     </div>
                 </div>
             </div>
@@ -28,7 +28,7 @@
             var input_data = $('#search_data').val();
             params.append('search_data', input_data);
 
-            axios.post('<?php echo base_url(); ?>Frontend/autocomplete', params)
+            axios.post('<?php echo base_url(); ?>Frontend/notice_search', params)
                 .then(function (data) {
                     console.log(data);
                     $('#search_results').html(data.data);

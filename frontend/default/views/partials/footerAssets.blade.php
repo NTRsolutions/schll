@@ -9,6 +9,5 @@
 <!-- Active js -->
 <script src="<?=base_url($frontendThemePath.'assets/js/custom.js')?>"></script>
 
-<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js" integrity="sha256-mpnrJ5DpEZZkwkE1ZgkEQQJW/46CSEh/STrZKOB/qoM=" crossorigin="anonymous"></script>
 @yield('footerAssetPush')

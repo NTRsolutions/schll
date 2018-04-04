@@ -300,7 +300,7 @@ class Frontend extends Frontend_Controller {
             }
             else
             {
-                echo "<li> <em> Not found ... </em> </li>";
+                echo "<div class='col-12'><h5><em>Məlumat tapılmadı</em></h5></div>";
             }
         }
     }
@@ -364,7 +364,94 @@ class Frontend extends Frontend_Controller {
             }
             else
             {
-                echo "<li> <em> Not found ... </em> </li>";
+                echo "<div class='col-12'><h5><em>Məlumat tapılmadı</em></h5></div>";
+            }
+        }
+    }
+
+    public function notice_search()
+    {
+        $search_data = $this->input->post('search_data');
+
+        if (empty($search_data)){
+            $result = $this->notice_m->get_notice();
+            if (!empty($result))
+            {
+                foreach ($result as $news):
+                    echo '
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="single_courses">
+                        <div class="single_courses_thumb">
+                            <img src="'.base_url('uploads/images/'.$news->photo).'" alt="">
+                            <div class="hover_overlay">
+                                <div class="links">
+                                    <a class="magnific-popup" href="'.base_url('uploads/images/'.$news->photo).'"><i class="fa fa-search" aria-hidden="true"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Single Courses Image Area End -->
+                        <div class="single_courses_desc">
+                            <!-- Single Courses Title Area End -->
+                            <div class="title">
+                                <a href="'.base_url('frontend/notice/'.$news->noticeID).'"><h5>'.$news->title.'</h5></a>
+                                <div class="date_time">
+                                    <div class="date">
+                                        <p><span class="icon-calendar"></span> '.date('d M Y', strtotime($news->create_date)).'</p>
+                                    </div>
+                                    <div class="time">
+                                        <p><span class="icon-clock"></span> '.date('G:i', strtotime($news->create_date)).'</p>
+                                    </div>
+                                </div>
+                                <p>'.namesorting($news->notice).'</p>
+                            </div>
+                            <!-- Single Courses Blog Title Area End -->
+                     </div>
+                    </div>
+                </div>'
+                    ;
+                endforeach;
+            }
+        }
+        elseif (!empty($search_data)) {
+            $result = $this->notice_m->get_autocomplete($search_data);
+            if (!empty($result))
+            {
+                foreach ($result as $news):
+                    echo '
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="single_courses">
+                        <div class="single_courses_thumb">
+                            <img src="'.base_url('uploads/images/'.$news->photo).'" alt="">
+                            <div class="hover_overlay">
+                                <div class="links">
+                                    <a class="magnific-popup" href="'.base_url('uploads/images/'.$news->photo).'"><i class="fa fa-search" aria-hidden="true"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Single Courses Image Area End -->
+                        <div class="single_courses_desc">
+                            <!-- Single Courses Title Area End -->
+                            <div class="title">
+                                <a href="'.base_url('frontend/notice/'.$news->noticeID).'"><h5>'.$news->title.'</h5></a>
+                                <div class="date_time">
+                                    <div class="date">
+                                        <p><span class="icon-calendar"></span> '.date('d M Y', strtotime($news->create_date)).'</p>
+                                    </div>
+                                    <div class="time">
+                                        <p><span class="icon-clock"></span> '.date('G:i', strtotime($news->create_date)).'</p>
+                                    </div>
+                                </div>
+                                <p>'.namesorting($news->notice).'</p>
+                            </div>
+                            <!-- Single Courses Blog Title Area End -->
+                     </div>
+                    </div>
+                </div>';
+                endforeach;
+            }
+            else
+            {
+                echo "<div class='col-12'><h5><em>Məlumat tapılmadı</em></h5></div>";
             }
         }
     }
