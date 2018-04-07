@@ -1,27 +1,4 @@
 <div class="row">
-<?php if(config_item('demo')) { ?>
-    <div class="col-sm-12" id="resetDummyData">
-        <div class="callout callout-danger">
-            <h4>Reminder!</h4>
-            <p>Dummy data will be reset in every <code>30</code> minutes</p>
-        </div>
-    </div>
-
-    <script type="text/javascript"> 
-      $(document).ready(function() {
-          var count = 7;
-          var countdown = setInterval(function(){
-            $("p.countdown").html(count + " seconds remaining!");
-            if (count == 0) {
-              clearInterval(countdown);
-              $('#resetDummyData').hide();
-            }
-            count--;
-          }, 1000);
-      });
-    </script>
-
-<?php } ?>
 <?php
 $arrayColor = array(
     'bg-orange-dark',
@@ -177,28 +154,28 @@ if(count($generateBoxArray)) {
 </div>
 
 
-<?php if($getActiveUserID == 1 || $getActiveUserID == 5) { ?>
-<div class="row">
-    <div class="col-sm-12">
-        <div class="box">
-            <!-- <div class="box-header">
-                <h3 class="box-title" id="earning_top_right_graph_title">
-                    <?=$this->lang->line('dashboard_per_day_attendance')?>
-                </h3>
-                <div class="box-tools pull-right">
-                    <button class="btn btn-box-tool" type="button" id="earning_top_right_graph_back_btn">
-                        <i class="fa fa-arrow-left"></i>
-                    </button>
-                </div>
-            </div> -->
-
-            <div class="box-body" style="padding: 0px;">
-                <div id="earningGraph"></div>
-            </div>
-        </div>
-    </div>
-</div>
-<?php } ?>
+<?php //if($getActiveUserID == 1 || $getActiveUserID == 5) { ?>
+<!--<div class="row">-->
+<!--    <div class="col-sm-12">-->
+<!--        <div class="box">-->
+<!--            <!-- <div class="box-header">-->
+<!--                <h3 class="box-title" id="earning_top_right_graph_title">-->
+<!--                    < ?//=$this->lang->line('dashboard_per_day_attendance')?>-->
+<!--                </h3>-->
+<!--                <div class="box-tools pull-right">-->
+<!--                    <button class="btn btn-box-tool" type="button" id="earning_top_right_graph_back_btn">-->
+<!--                        <i class="fa fa-arrow-left"></i>-->
+<!--                    </button>-->
+<!--                </div>-->
+<!--            </div> -->
+<!---->
+<!--            <div class="box-body" style="padding: 0px;">-->
+<!--                <div id="earningGraph"></div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</div>-->
+<?php //} ?>
 
 <?php if($getActiveUserID == 1 || $getActiveUserID == 5) { ?>
 <div class="row">
@@ -206,27 +183,30 @@ if(count($generateBoxArray)) {
         <?php $this->load->view('dashboard/ProfileBox'); ?>
     </div>
     <div class="col-sm-8">
-        <div class="box">
-            <div class="box-body" style="padding: 0px;">
-                <div id="attendanceGraph"></div>
-            </div>
-        </div>
+        <?php $this->load->view('dashboard/NoticeBoard', array('val' => 5, 'length' => 15, 'maxlength' => 45)); ?>
     </div>
+<!--    <div class="col-sm-8">-->
+<!--        <div class="box">-->
+<!--            <div class="box-body" style="padding: 0px;">-->
+<!--                <div id="attendanceGraph"></div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
 </div>
 
 <div class="row">
     <?php if(permissionChecker('notice')) { ?>
-    <div class="col-sm-6">
-        <?php $this->load->view('dashboard/NoticeBoard', array('val' => 5, 'length' => 15, 'maxlength' => 45)); ?>
-    </div>
+<!--    <div class="col-sm-6">-->
+<!--        --><?php //$this->load->view('dashboard/NoticeBoard', array('val' => 5, 'length' => 15, 'maxlength' => 45)); ?>
+<!--    </div>-->
     <?php } ?>
-    <div class="col-sm-6">
-        <div class="box">
-            <div class="box-body" style="padding: 0px;">
-                <div id="visitor"></div>
-            </div>
-        </div>
-    </div>
+<!--    <div class="col-sm-6">-->
+<!--        <div class="box">-->
+<!--            <div class="box-body" style="padding: 0px;">-->
+<!--                <div id="visitor"></div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
 </div>
 <?php } else { ?>
 <div class="row">
@@ -244,17 +224,6 @@ if(count($generateBoxArray)) {
     <?php } ?>
 </div>
 <?php } ?>
-
-<div class="row">
-  <div class="col-sm-12">
-      <div class="box">
-          <div class="box-body">
-              <!-- THE CALENDAR -->
-              <div id="calendar"></div>
-          </div>
-      </div>
-  </div>
-</div><!-- /.row -->
 
 
 <?php
